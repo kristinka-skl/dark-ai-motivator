@@ -1,142 +1,158 @@
-.page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
-}
-
+/* Base styles (Mobile first, fluid for 320-375px) */
 .main {
   display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
-}
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
-  gap: 24px;
-}
-
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
-}
-
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
-}
-
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.ctas a {
-  display: flex;
-  justify-content: center;
   align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
+  justify-content: center;
+  min-height: 100vh;
+  padding: clamp(1rem, 5vw, 2rem);
+}
+
+.title {
+  font-size: clamp(2rem, 10vw, 2.5rem);
+  margin-bottom: 2rem;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  letter-spacing: 2px;
+}
+
+.card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: clamp(1.5rem, 8vw, 2rem) clamp(1rem, 5vw, 1.5rem);
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  margin-bottom: 3rem;
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.quote {
+  font-size: clamp(1.1rem, 6vw, 1.3rem);
+  line-height: 1.6;
+  font-weight: 300;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+}
+
+.placeholder {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.button {
+  background: transparent;
+  color: white;
+  border: 2px solid var(--accent-color);
+  padding: 0.8rem 1.5rem;
+  font-size: clamp(1rem, 5vw, 1.1rem);
+  border-radius: 8px;
   cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(138, 43, 226, 0.2);
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+.button:hover {
+  background: var(--accent-color);
+  box-shadow: var(--accent-glow);
+  transform: translateY(-2px);
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+.button:active {
+  transform: translateY(0);
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
-@media (max-width: 600px) {
+.langSwitcher {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.langBtn {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--glass-border);
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: var(--font-oswald);
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.langBtn:hover {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.langBtn.active {
+  color: white;
+  border-color: var(--accent-color);
+  background: rgba(138, 43, 226, 0.2);
+}
+
+/* Adaptive Tablets (from 376px to 1023px) */
+@media (min-width: 376px) {
   .main {
-    padding: 48px 24px;
+    padding: 2rem;
   }
-
-  .intro {
-    gap: 16px;
+  .title {
+    font-size: 3rem;
   }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
+  .card {
+    padding: 3rem 2rem;
+  }
+  .quote {
+    font-size: 1.5rem;
+  }
+  .button {
+    padding: 1rem 2.5rem;
+    font-size: 1.2rem;
+  }
+  .langSwitcher {
+    top: 2rem;
+    right: 2rem;
+  }
+  .langBtn {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
+/* Adaptive Desktop (from 1024px) */
+@media (min-width: 1024px) {
+  .title {
+    font-size: 4rem;
+    letter-spacing: 4px;
   }
-
-  .page {
-    --background: #000;
-    --foreground: #000;
-
-    --text-primary: #ededed;
-    --text-secondary: #999;
-
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
+  .card {
+    max-width: 800px;
+    padding: 4rem 3rem;
+    min-height: 250px;
+  }
+  .quote {
+    font-size: 1.8rem;
+  }
+  .button {
+    padding: 1.2rem 3rem;
+    font-size: 1.5rem;
   }
 }
