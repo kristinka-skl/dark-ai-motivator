@@ -4,23 +4,21 @@ import connectToDatabase from '@/lib/db';
 import PromptConfig from '@/lib/models/PromptConfig';
 import Quote from '@/lib/models/Quote';
 
-export const dynamic = 'force-dynamic'; // Вимикаємо кешування роуту Next.js
+export const dynamic = 'force-dynamic';
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function GET(request: NextRequest) {
   const lang = request.nextUrl.searchParams.get('lang') || 'uk';
-  
+
   try {
     await connectToDatabase();
 
-    // 1. Отримуємо актуальну конфігурацію промптів з БД
     let dbConfig = await PromptConfig.findOne({ active: true });
 
     let systemInstruction = "";
     let examples = [];
 
-    // Fallback: якщо БД порожня, використовуємо дефолтні значення з правильною мовою
     if (!dbConfig) {
       if (lang === 'en') {
         systemInstruction = "You are a brutal but supportive motivator. Your style is metal, rock, dark aesthetics. You speak sharply, frankly, but inspiringly. Use metaphors of fire, steel, darkness, and struggle. Do not be banal. Answer in 1-2 sentences. Speak directly to the user.";
@@ -38,8 +36,7 @@ export async function GET(request: NextRequest) {
     } else {
       systemInstruction = dbConfig.systemInstruction;
       examples = dbConfig.examples || [];
-      
-      // Додаємо критичне правило, щоб AI не збивався через мову прикладів збережених у БД
+
       if (lang === 'en') {
         systemInstruction += "\n\nCRITICAL REQUIREMENT: Regardless of the language used in the examples or instructions above, your final response MUST be written ENTIRELY in English.";
       } else {
@@ -47,7 +44,6 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // 2. Форматуємо приклади для Gemini API
     const contents = [];
     if (examples && examples.length > 0) {
       for (const example of examples) {
@@ -55,78 +51,73 @@ export async function GET(request: NextRequest) {
         contents.push({ role: 'model', parts: [{ text: example.ai }] });
       }
     }
-    
-    const finalPromptText = lang === 'en' 
-        ? "Give me a new portion of brutal motivation, do not repeat the previous ones." 
-        : "Дай нову порцію брутальної мотивації, не повторюй попередні.";
-        
+
+    const finalPromptText = lang === 'en'
+      ? "Give me a new portion of brutal motivation, do not repeat the previous ones."
+      : "Дай нову порцію брутальної мотивації, не повторюй попередні.";
+
     contents.push({ role: 'user', parts: [{ text: finalPromptText }] });
 
-    // 3. Генеруємо текст
     const response = await ai.models.generateContent({
-        model: 'gemini-flash-latest',
-        contents: contents,
-        config: {
-            systemInstruction: systemInstruction,
-            temperature: 0.9,
-        }
+      model: 'gemini-flash-latest',
+      contents: contents,
+      config: {
+        systemInstruction: systemInstruction,
+        temperature: 0.9,
+      }
     });
 
     const generatedText = response.text?.trim();
 
     if (!generatedText) {
-        throw new Error("Отримана порожня відповідь від AI");
+      throw new Error("Отримана порожня відповідь від AI");
     }
 
-    // 4. Зберігаємо згенеровану цитату в БД
     try {
-        await Quote.create({ text: generatedText, mood: 'dark', lang: lang });
+      await Quote.create({ text: generatedText, mood: 'dark', lang: lang });
     } catch (dbError) {
-        console.error("Не вдалося зберегти цитату в БД:", dbError);
+      console.error("Не вдалося зберегти цитату в БД:", dbError);
     }
 
     return NextResponse.json({ quote: generatedText });
   } catch (error: any) {
     console.error("Помилка генерації (можливо ліміт API):", error?.message || error);
-    
-    // Сценарій 2: Graceful Degradation (непомітна підміна)
+
     try {
-        await connectToDatabase();
-        const query = { lang: lang };
-        const count = await Quote.countDocuments(query);
-        
-        // Віддаємо стару цитату з бази БЕЗ жодних повідомлень про помилки
-        if (count > 0) {
-            const random = Math.floor(Math.random() * count);
-            const randomQuote = await Quote.findOne(query).skip(random);
-            if (randomQuote) {
-                return NextResponse.json({ quote: randomQuote.text, fallback: true });
-            }
+      await connectToDatabase();
+      const query = { lang: lang };
+      const count = await Quote.countDocuments(query);
+
+      if (count > 0) {
+        const random = Math.floor(Math.random() * count);
+        const randomQuote = await Quote.findOne(query).skip(random);
+        if (randomQuote) {
+          return NextResponse.json({ quote: randomQuote.text, fallback: true });
         }
+      }
     } catch (fallbackError) {
-        console.error("Помилка БД під час fallback:", fallbackError);
+      console.error("Помилка БД під час fallback:", fallbackError);
     }
 
-    // Сценарій 3: Transparent Feedback (цитат в базі немає, віддаємо стилізовану помилку)
     let timeHintUK = "пізніше";
     let timeHintEN = "later";
-    
+
     if (error?.message?.includes("PerDay")) {
-        timeHintUK = "завтра";
-        timeHintEN = "tomorrow";
+      timeHintUK = "завтра";
+      timeHintEN = "tomorrow";
     } else {
-        const retryMatch = error?.message?.match(/retry in ([\d\.]+)s/i);
-        if (retryMatch && retryMatch[1]) {
-            const secs = Math.ceil(parseFloat(retryMatch[1]));
-            if (secs < 60) {
-                timeHintUK = `через ${secs} сек`;
-                timeHintEN = `in ${secs} sec`;
-            } else {
-                const mins = Math.ceil(secs / 60);
-                timeHintUK = `через ~${mins} хв`;
-                timeHintEN = `in ~${mins} min`;
-            }
+      const retryMatch = error?.message?.match(/retry in ([\d\.]+)s/i);
+      if (retryMatch && retryMatch[1]) {
+        const secs = Math.ceil(parseFloat(retryMatch[1]));
+        if (secs < 60) {
+          timeHintUK = `через ${secs} сек`;
+          timeHintEN = `in ${secs} sec`;
+        } else {
+          const mins = Math.ceil(secs / 60);
+          timeHintUK = `через ~${mins} хв`;
+          timeHintEN = `in ~${mins} min`;
         }
+      }
     }
 
     const errorMsgUK = `Навіть вогню потрібен час, щоб розгорітися знову. Наступна іскра буде доступна ${timeHintUK}.`;
