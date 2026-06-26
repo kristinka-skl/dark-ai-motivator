@@ -54,7 +54,7 @@
 .quote {
   font-size: clamp(1.1rem, 6vw, 1.3rem);
   line-height: 1.6;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-primary);
   white-space: pre-wrap;
 }
@@ -124,6 +124,21 @@
   color: white;
   border-color: var(--accent-color);
   background: rgba(138, 43, 226, 0.2);
+}
+
+/* Animations & States */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.quoteContent {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.errorCard {
+  border-color: rgba(255, 60, 60, 0.5);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(255, 60, 60, 0.1);
 }
 
 /* Adaptive Tablets (from 376px to 1023px) */

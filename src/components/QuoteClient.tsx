@@ -26,11 +26,13 @@ export default function QuoteClient() {
   const [quote, setQuote] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lang, setLang] = useState<'uk' | 'en'>('uk');
+  const [isError, setIsError] = useState(false);
 
   const t = translations[lang];
 
   const generateQuote = async () => {
     setLoading(true);
+    setIsError(false);
     try {
       const response = await fetch(`/api/generate-quote?lang=${lang}`, { cache: 'no-store' });
       if (!response.ok) {
@@ -41,6 +43,7 @@ export default function QuoteClient() {
     } catch (error) {
       console.error(error);
       setQuote(t.errorText);
+      setIsError(true);
     } finally {
       setLoading(false);
     }
@@ -51,13 +54,13 @@ export default function QuoteClient() {
       <div className={styles.langSwitcher}>
         <button 
           className={`${styles.langBtn} ${lang === 'uk' ? styles.active : ''}`} 
-          onClick={() => { setLang('uk'); setQuote(null); }}
+          onClick={() => { setLang('uk'); setQuote(null); setIsError(false); }}
         >
           UK
         </button>
         <button 
           className={`${styles.langBtn} ${lang === 'en' ? styles.active : ''}`} 
-          onClick={() => { setLang('en'); setQuote(null); }}
+          onClick={() => { setLang('en'); setQuote(null); setIsError(false); }}
         >
           EN
         </button>
@@ -65,11 +68,24 @@ export default function QuoteClient() {
 
       <h1 className={styles.title}>{t.title}</h1>
       
-      <div className={styles.card}>
-        {loading ? (
+      <div className={`${styles.card} ${isError ? styles.errorCard : ''}`} style={{ position: 'relative' }}>
+        {loading && quote ? (
+          <>
+            {/* Прихована стара цитата для збереження висоти картки */}
+            <p className={styles.quote} style={{ visibility: 'hidden' }}>
+              {isError && "⚠️ "}{quote}
+            </p>
+            {/* Текст завантаження абсолютно відцентрований поверх */}
+            <p className={styles.quote} style={{ position: 'absolute', width: '100%', left: '50%', top: '50%', transform: 'translate(-50%, -50%)', margin: 0 }}>
+              {t.loadingText}
+            </p>
+          </>
+        ) : loading ? (
           <p className={styles.quote}>{t.loadingText}</p>
         ) : quote ? (
-          <p className={styles.quote}>{quote}</p>
+          <p key={quote} className={`${styles.quote} ${styles.quoteContent}`}>
+            {isError && "⚠️ "}{quote}
+          </p>
         ) : (
           <p className={`${styles.quote} ${styles.placeholder}`}>{t.placeholder}</p>
         )}
