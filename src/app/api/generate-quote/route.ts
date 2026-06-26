@@ -97,8 +97,6 @@ export async function GET(request: NextRequest) {
       config: {
         systemInstruction,
         temperature: 0.9,
-        // Thinking mode вимкнено: цитата у 1-2 речення не потребує роздумів,
-        // а thinking суттєво збільшує час відповіді (10-25s → 2-4s)
         thinkingConfig: { thinkingBudget: 0 },
       },
     });

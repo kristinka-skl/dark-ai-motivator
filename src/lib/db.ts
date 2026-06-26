@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 
 declare global {
-  // eslint-disable-next-line no-var
   var mongooseCache: {
     conn: typeof mongoose | null;
     promise: Promise<typeof mongoose> | null;
@@ -29,7 +28,6 @@ async function connectToDatabase(): Promise<typeof mongoose> {
     cached.promise = mongoose
       .connect(MONGODB_URI as string, { bufferCommands: false })
       .catch((err) => {
-        // Reset so the next call can try again instead of re-throwing a stale rejection
         cached.promise = null;
         throw err;
       });
