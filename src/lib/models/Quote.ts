@@ -1,14 +1,35 @@
-import mongoose from 'mongoose';
+import mongoose, { Schema, Document, Model } from 'mongoose';
 
-const QuoteSchema = new mongoose.Schema({
-  text: {
-    type: String,
-    required: true,
+export interface IQuote extends Document {
+  text: string;
+  mood: string;
+  lang: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const QuoteSchema = new Schema<IQuote>(
+  {
+    text: {
+      type: String,
+      required: true,
+    },
+    mood: {
+      type: String,
+      default: 'dark',
+    },
+    lang: {
+      type: String,
+      required: true,
+      enum: ['uk', 'en'],
+      default: 'uk',
+    },
   },
-  mood: {
-    type: String,
-    default: 'dark',
-  }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-export default mongoose.models.Quote || mongoose.model('Quote', QuoteSchema);
+const Quote: Model<IQuote> =
+  (mongoose.models.Quote as Model<IQuote>) ||
+  mongoose.model<IQuote>('Quote', QuoteSchema);
+
+export default Quote;
