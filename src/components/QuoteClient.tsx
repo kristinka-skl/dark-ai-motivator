@@ -8,7 +8,7 @@ const translations = {
     title: "Темна Мотивація",
     loadingText: "Куємо слова у вогні...",
     placeholder: "Натисни кнопку, щоб отримати іскру.",
-    btnLoading: "Генерація...",
+    btnLoading: "Генерація",
     btnText: "Отримати мотивацію",
     errorText: "Навіть темрява іноді дає збій. Спробуй ще раз."
   },
@@ -16,7 +16,7 @@ const translations = {
     title: "Dark Motivation",
     loadingText: "Forging words in fire...",
     placeholder: "Click the button to ignite the spark.",
-    btnLoading: "Forging...",
+    btnLoading: "Forging",
     btnText: "Get motivation",
     errorText: "Even darkness fails sometimes. Try again."
   }
@@ -80,7 +80,14 @@ export default function QuoteClient() {
         onClick={generateQuote}
         disabled={loading}
       >
-        {loading ? t.btnLoading : t.btnText}
+        {loading ? (
+          <>
+            {t.btnLoading}
+            <span className={styles.dot}>.</span>
+            <span className={styles.dot}>.</span>
+            <span className={styles.dot}>.</span>
+          </>
+        ) : t.btnText}
       </button>
     </main>
   );
